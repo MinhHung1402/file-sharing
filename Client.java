@@ -105,7 +105,6 @@ public class Client{
 
 	public static void logIntoAccount(){
 		int choice;
-		boolean isTerminate = true;
 		String Email="",Password="";
 		try {
 			outToServer.writeBytes("login()\n");
@@ -125,7 +124,7 @@ public class Client{
 				String bool1=inFromServer.readLine();
 			
 				if(bool1.equals("true")){
-					System.out.println("\nLogin successfull...!!!\n\n\n");
+					System.out.println("\nLogin successful...!!!\n\n\n");
 					File folder = new File(Email);
 					if (!folder.exists()) {
 						boolean isCreated = folder.mkdir();
@@ -148,9 +147,7 @@ public class Client{
 								seeFiles(Email);
 								break;
 							case 2:
-								System.out.println("In main function before upload");
-								uploadFiles();
-								System.out.println("Here in main function");
+								uploadFiles(Email);
 								break;
 							case 3:downloadFile(Email);
 								break;
@@ -180,11 +177,6 @@ public class Client{
 		}
 	}
 	
-	
-	
-	
-	
-
 	public static void deleteFile(){
 		Scanner Input = new Scanner(System.in);
 		try {
@@ -222,8 +214,7 @@ public class Client{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+			
 	}
 	
 	public static void downloadFile(String dirName){
@@ -235,7 +226,6 @@ public class Client{
 			outToServer.flush();
 			System.out.println("Client send download()");
 		
-			System.out.println("Client called see files");
 			System.out.println("\n\n Enter file name you want to download: ");
 			fileName = Input.next();
 			System.out.println("You have entered "+fileName);
@@ -243,7 +233,7 @@ public class Client{
 			outToServer.flush();
 			System.out.println("Client sent file name to download");
 			String bool = inFromServer.readLine();
-			System.out.println("CLient received bool with "+bool);
+			System.out.println("CLient received bool with " + bool);
 			if(bool.equals("true")){
 				System.out.println("in if");
 			
@@ -328,7 +318,7 @@ public class Client{
 	}
 
 
-	public static void uploadFiles(){
+	public static void uploadFiles(String dirName){
 		byte[] bytes = new byte[100];
 		Scanner KeyboardInput = new Scanner(System.in);
 		OutputStream outToServerByte = null;
@@ -336,14 +326,22 @@ public class Client{
 			outToServerByte = connectionSocket.getOutputStream();
 			outToServer.writeBytes("uploadFiles()\n");
 			outToServer.flush();
-			System.out.println("Server sent upload files files");
+			System.out.println("Server sent upload files");
 			System.out.println("Enter the name of file you want to upload");
 			String fileName = KeyboardInput.nextLine();
 			outToServer.writeBytes(fileName+"\n");
 			outToServer.flush();
 			System.out.println("Sending Data to Server...");
 			int count = 0;
-			File file = new File(fileName);
+
+			String path = System.getProperty("user.dir");
+			path = path.replaceAll("\\\\", "/");
+			path = path.concat("/");
+			path = path.concat(dirName);
+			path = path.concat("/");
+			path = path.concat(fileName);
+			File file = new File(path);
+
 			double length = file.length();
 			String slength = Double.toString(length);
 			System.out.println("length is: "+slength);
@@ -356,7 +354,7 @@ public class Client{
 	    		outToServerByte.write(bytes, 0, count);
 	    		outToServerByte.flush();
 	    	}
-
+			fis.close();
 			System.out.println("Out side loop");
 			outToServer.flush();
 			System.out.println("File sent returning to main function");
